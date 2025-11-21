@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-type Department =
+export type Department =
   | 'civil_engineering'
   | 'computer_engineering'
   | 'electrical_engineering'
@@ -14,7 +14,7 @@ type UserRole = 'administrator' | 'chairman' | 'oic' | 'faculty' | 'reads' | 'st
 
 type UserStatus = 'pending_approval' | 'active' | 'deactivated' | 'rejected';
 
-const departments: string[] = [
+export const departments: Department[] = [
   'civil_engineering',
   'computer_engineering',
   'electrical_engineering',
@@ -64,4 +64,5 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-module.exports = mongoose.model('user', UserSchema);
+export default mongoose.model('user', UserSchema);
+
