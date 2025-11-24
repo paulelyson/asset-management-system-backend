@@ -1,8 +1,30 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATABASE = process.env.DATABASE || 'mongodb://127.0.0.1:27017/usjr_ams_local';
+
+/**
+ * routes import
+ */
+import EquipmentRoute from './routes/equipment.route'
+
+/**
+ * middlewares
+ */
+
+app.use(express.json());
+app.use(cors());
+
+/**
+ * routes
+ */
+
+
+
+app.use('/api/equipment', EquipmentRoute);
+
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Success get');
