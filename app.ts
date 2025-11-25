@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 
 const app = express();
@@ -20,10 +21,22 @@ app.use(cors());
 /**
  * routes
  */
-
-
-
 app.use('/api/equipment', EquipmentRoute);
+
+/**
+ * connect to database
+ */
+
+Promise.resolve()
+  .then(() => {
+    mongoose.set('strictQuery', true);
+    mongoose.connect(DATABASE);
+    console.log('database connected');
+  })
+  .catch((err: Error) => {
+    throw err;
+  });
+
 
 
 app.get('/', (req: Request, res: Response) => {

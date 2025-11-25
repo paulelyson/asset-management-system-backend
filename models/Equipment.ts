@@ -29,18 +29,18 @@ interface IEquipment {
   color: string;
   modelNo: string;
   totalQuantity: number;
-  conditionAndQuatity: IConditionAndQuantity[];
+  conditionAndQuantity: IConditionAndQuantity[];
   unit: string;
   matter: Matter;
   description: string;
   status: EquipmentStatus;
   dateAcquired: Date;
-  images: IEquipmentImage;
+  images: IEquipmentImage[];
   remarks: string;
   inventorytag: boolean;
   checkedBy: string;
   department: Department;
-  inventoryType: EquipmentInventoryType;
+  inventorytype: EquipmentInventoryType;
   location: string;
   confirmed: boolean;
   warrantyPeriod: Date;
@@ -68,18 +68,18 @@ const EquipmentSchema = new Schema<IEquipment>(
     color: { type: String, required: true },
     modelNo: { type: String, required: true },
     totalQuantity: { type: Number, required: true },
-    conditionAndQuatity: { type: [ConditionAndQuantitySchema], required: true },
+    conditionAndQuantity: { type: [ConditionAndQuantitySchema], required: true },
     unit: { type: String, required: true },
     matter: { type: String, required: true },
     description: { type: String, required: true },
     status: { type: String, required: true, enum: equipmentStatus },
     dateAcquired: { type: Date, required: true, default: Date.now },
-    images: { type: EquipmentImageSchema },
+    images: { type: [EquipmentImageSchema] },
     remarks: { type: String, required: true },
     inventorytag: { type: Boolean, required: true },
     checkedBy: { type: String, required: true },
     department: { type: String, required: true, enum: departments },
-    inventoryType: { type: String, required: true },
+    inventorytype: { type: String, required: true },
     location: { type: String, required: true },
     confirmed: { type: Boolean, required: true },
     warrantyPeriod: { type: Date, required: true, default: Date.now },
