@@ -10,6 +10,7 @@ const DATABASE = process.env.DATABASE || 'mongodb://127.0.0.1:27017/usjr_ams_loc
  * routes import
  */
 import EquipmentRoute from './routes/equipment.route'
+import BorrowedEquipment from './routes/borrowedEquipment.route'
 
 /**
  * middlewares
@@ -22,6 +23,8 @@ app.use(cors());
  * routes
  */
 app.use('/api/equipment', EquipmentRoute);
+app.use('/api/borrowedequipment', BorrowedEquipment);
+
 
 /**
  * connect to database

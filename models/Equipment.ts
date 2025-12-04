@@ -10,7 +10,7 @@ type Matter = 'solid' | 'liquid' | 'gas';
 const equipmentCondition: EquipmentCondition[] = ['functional', 'defective', 'obsolete', 'lost', 'for_checkup', 'turned_over'];
 const equipmentStatus: EquipmentStatus[] = ['acquired', 'returned'];
 
-interface IConditionAndQuantity {
+export interface IConditionAndQuantity {
   condition: EquipmentCondition;
   quantity: number;
 }
@@ -26,6 +26,7 @@ interface IEquipment {
   equipmentType: string;
   categories: string[];
   name: string;
+  brand: string;
   color: string;
   modelNo: string;
   totalQuantity: number;
@@ -48,7 +49,7 @@ interface IEquipment {
   dis: boolean;
 }
 
-const ConditionAndQuantitySchema = new Schema<IConditionAndQuantity>({
+export const ConditionAndQuantitySchema = new Schema<IConditionAndQuantity>({
   condition: { type: String, required: true, enum: equipmentCondition },
   quantity: { type: Number, required: true },
 });
@@ -65,6 +66,7 @@ const EquipmentSchema = new Schema<IEquipment>(
     equipmentType: { type: String, required: true },
     categories: { type: [String], required: true },
     name: { type: String, required: true },
+    brand: { type: String, required: true },
     color: { type: String, required: true },
     modelNo: { type: String, required: true },
     totalQuantity: { type: Number, required: true },
@@ -74,7 +76,7 @@ const EquipmentSchema = new Schema<IEquipment>(
     description: { type: String, required: true },
     status: { type: String, required: true, enum: equipmentStatus },
     dateAcquired: { type: Date, required: true, default: Date.now },
-    images: { type: [EquipmentImageSchema] },
+    images: { type: [EquipmentImageSchema], default: [] },
     remarks: { type: String, required: true },
     inventorytag: { type: Boolean, required: true },
     checkedBy: { type: String, required: true },
