@@ -22,7 +22,7 @@ interface IBorrowedEquipment {
   remarks: string;
 }
 
-interface BorrowingDetails {
+export interface BorrowingDetails {
   borrower: Types.ObjectId;
   classDepartment: string;
   faculty: Types.ObjectId;

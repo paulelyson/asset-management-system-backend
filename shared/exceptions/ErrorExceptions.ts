@@ -14,7 +14,7 @@ class ErrorException extends Error implements IErrorException {
   errors?: string[] = [];
   message: string = 'Internal Server Error';
 
-  constructor(errors?: string[], message?: string, statusCode?: StatusCode) {
+  constructor(statusCode?: StatusCode, message?: string, errors?: string[]) {
     super();
     this.statusCode = statusCode || this.statusCode;
     this.message = message || this.message;

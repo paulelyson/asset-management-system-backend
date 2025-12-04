@@ -12,7 +12,7 @@ router.get('/', async (req: Request, res: Response) =>
         .skip(limit * (page - 1))
         .limit(limit)
         .lean();
-      res.json({ data: result, message: 'Success getting daily attendance', success: true });
+      res.json({ data: result, message: 'Success getting equipment', success: true });
     })
     .catch((err) => {
       res.status(400).json({ data: null, message: err.message, success: false });
