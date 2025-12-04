@@ -1,8 +1,8 @@
-import BorrowedEquipment, { BorrowingDetails } from '../models/BorrowedEquipment';
+import BorrowedEquipment, { IBorrowingDetails } from '../models/BorrowedEquipment';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 
 class BorrowedEquipmentRepository {
-  save = async (borrowedEquipment: BorrowingDetails) =>
+  save = async (borrowedEquipment: IBorrowingDetails) =>
     Promise.resolve()
       .then(async () => {
         const data = new BorrowedEquipment(borrowedEquipment);

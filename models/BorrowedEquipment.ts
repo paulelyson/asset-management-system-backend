@@ -22,7 +22,7 @@ interface IBorrowedEquipment {
   remarks: string;
 }
 
-export interface BorrowingDetails {
+export interface IBorrowingDetails {
   borrower: Types.ObjectId;
   classDepartment: string;
   faculty: Types.ObjectId;
@@ -46,7 +46,7 @@ const BorrowedEquipmentSchema = new Schema<IBorrowedEquipment>({
   remarks: { type: String, required: true },
 });
 
-const BorrowingDetailsSchema = new Schema<BorrowingDetails>(
+const BorrowingDetailsSchema = new Schema<IBorrowingDetails>(
   {
     borrower: { type: Schema.Types.ObjectId, required: true },
     classDepartment: { type: String, required: true },

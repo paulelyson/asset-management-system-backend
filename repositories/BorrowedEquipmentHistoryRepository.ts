@@ -1,0 +1,18 @@
+import { IBorrowedEquipmentHistory } from '../models/BorrowedEquipmentHistory';
+import BorrowedEquipmentHistory from '../models/BorrowedEquipmentHistory';
+import ErrorException from '../shared/exceptions/ErrorExceptions';
+
+class BorrowedEquipmentHistoryRepository {
+  save = async (history: IBorrowedEquipmentHistory) =>
+    Promise.resolve()
+      .then(async () => {
+        const data = new BorrowedEquipmentHistory(history);
+        await data.save();
+      })
+      .catch((err) => {
+        const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);
+        throw new ErrorException(400, err._message, errors);
+      });
+}
+
+export default BorrowedEquipmentHistoryRepository;
