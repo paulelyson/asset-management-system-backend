@@ -1,4 +1,5 @@
 import BorrowedEquipment, { BorrowingDetails } from '../models/BorrowedEquipment';
+import ErrorException from '../shared/exceptions/ErrorExceptions';
 
 class BorrowedEquipmentRepository {
   save = async (borrowedEquipment: BorrowingDetails) =>
@@ -8,8 +9,9 @@ class BorrowedEquipmentRepository {
         await data.save();
       })
       .catch((err) => {
-        console.log(err);
-        throw new ErrorException(400);
+        const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);
+        console.log(errors);
+        throw new ErrorException(400, err._message, errors);
       });
 }
 

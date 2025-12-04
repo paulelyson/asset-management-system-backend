@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentRepository';
+import ErrorException from '../shared/exceptions/ErrorExceptions';
 const router = Router();
 const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
 

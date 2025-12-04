@@ -21,3 +21,5 @@ class ErrorException extends Error implements IErrorException {
     this.errors = errors || this.errors;
   }
 }
+
+export default ErrorException

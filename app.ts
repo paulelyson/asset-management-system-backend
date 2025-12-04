@@ -23,7 +23,7 @@ app.use(cors());
  * routes
  */
 app.use('/api/equipment', EquipmentRoute);
-app.use('/api/borrowedequipment', BorrowedEquipment);
+app.use('/api/borrowequipment', BorrowedEquipment);
 
 
 /**
