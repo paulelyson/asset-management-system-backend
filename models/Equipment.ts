@@ -21,7 +21,7 @@ interface IEquipmentImage {
   original: string;
 }
 
-interface IEquipment {
+export interface IEquipment {
   serialNo: string;
   equipmentType: string;
   categories: string[];

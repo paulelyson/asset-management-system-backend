@@ -29,7 +29,7 @@ const userRoles = ['administrator', 'chairman', 'oic', 'faculty', 'reads', 'stud
 
 const userStatus = ['pending_approval', 'active', 'deactivated', 'rejected'];
 
-interface IUser {
+export interface IUser {
   firstName: string;
   middleName: string;
   lastName: string;

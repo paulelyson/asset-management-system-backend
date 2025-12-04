@@ -1,5 +1,6 @@
-import BorrowedEquipment, { IBorrowingDetails } from '../models/BorrowedEquipment';
+import BorrowedEquipment, { IBorrowingDetails, BorrowedEqpmnt } from '../models/BorrowedEquipment';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
+import { GetBorrowedEquipmentAggregate } from '../shared/aggregations/BorrowedEquipment.aggregate';
 
 class BorrowedEquipmentRepository {
   save = async (borrowedEquipment: IBorrowingDetails) =>
@@ -10,9 +11,21 @@ class BorrowedEquipmentRepository {
       })
       .catch((err) => {
         const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);
-        console.log(errors);
-        throw new ErrorException(400, err._message, errors);
+        throw new ErrorException(400, err.message, errors);
       });
+
+  find = async (): Promise<BorrowedEqpmnt[]> =>
+    Promise.resolve()
+      .then(async () => {
+        const aggregateQuery = GetBorrowedEquipmentAggregate();
+        const result: BorrowedEqpmnt[] = await BorrowedEquipment.aggregate(aggregateQuery);
+        return result;
+      })
+      .catch((err) => {
+        throw new ErrorException(400);
+      });
+
+  findById = async () => {};
 }
 
 export default BorrowedEquipmentRepository;
