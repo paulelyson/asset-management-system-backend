@@ -7,7 +7,7 @@ type EquipmentAvailability = 'available' | 'borrowed' | 'unreturned';
 type EquipmentInventoryType = 'inventory' | 'non_inventory';
 type Matter = 'solid' | 'liquid' | 'gas';
 
-const equipmentCondition: EquipmentCondition[] = ['functional', 'defective', 'obsolete', 'lost', 'for_checkup', 'turned_over'];
+export const EQUIPMENT_CONDITION: EquipmentCondition[] = ['functional', 'defective', 'obsolete', 'lost', 'for_checkup', 'turned_over'];
 const equipmentStatus: EquipmentStatus[] = ['acquired', 'returned'];
 
 export interface IConditionAndQuantity {
@@ -50,7 +50,7 @@ export interface IEquipment {
 }
 
 export const ConditionAndQuantitySchema = new Schema<IConditionAndQuantity>({
-  condition: { type: String, required: true, enum: equipmentCondition },
+  condition: { type: String, required: true, enum: EQUIPMENT_CONDITION },
   quantity: { type: Number, required: true },
 });
 

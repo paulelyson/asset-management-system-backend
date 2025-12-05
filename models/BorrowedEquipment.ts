@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
-import { ConditionAndQuantitySchema, IConditionAndQuantity, IEquipment } from './Equipment';
+import { ConditionAndQuantitySchema, EQUIPMENT_CONDITION, IConditionAndQuantity, IEquipment } from './Equipment';
 import { Department, departments, IUser } from './User';
 
 const validateTime = (time: string) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
@@ -8,7 +8,7 @@ const minArrayLength = (min: number) => ({
   message: (v: any) => `Array must contain at least ${min} items.`,
 });
 
-const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatus[] = [
+const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
   'requested',
   'faculty_confirmed',
   'faculty_rejected',
@@ -21,7 +21,7 @@ const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatus[] = [
   'system_reset',
 ];
 
-export type BorrowedEquipmentStatus =
+export type BorrowedEquipmentStatusType =
   | 'requested'
   | 'faculty_confirmed'
   | 'faculty_rejected'
@@ -33,12 +33,14 @@ export type BorrowedEquipmentStatus =
   | 'unreturned'
   | 'system_reset';
 
+interface BorrowedEquipmentStatus extends IConditionAndQuantity {
+  status: string;
+}
+
 interface IBorrowedEquipment {
   equipment: Types.ObjectId;
   quantity: number;
-  releasedQtyCond: IConditionAndQuantity[];
-  returnedQtyCond: IConditionAndQuantity[];
-  status: BorrowedEquipmentStatus;
+  borrowedEquipmentStatus: BorrowedEquipmentStatus[];
   remarks: string;
 }
 
@@ -57,12 +59,19 @@ export interface IBorrowingDetails {
   dis: boolean;
 }
 
+const BorrowedEquipmentStatusSchema = new Schema<BorrowedEquipmentStatus>(
+  {
+    quantity: { type: Number, required: true },
+    condition: { type: String, required: true, enum: EQUIPMENT_CONDITION },
+    status: { type: String, required: true, enum: BORROWED_EQUIPMENT_STATUS },
+  },
+  { timestamps: true }
+);
+
 const BorrowedEquipmentSchema = new Schema<IBorrowedEquipment>({
   equipment: { type: Schema.Types.ObjectId, required: true },
   quantity: { type: Number, required: true, min: 1 },
-  releasedQtyCond: { type: [ConditionAndQuantitySchema], default: [] },
-  returnedQtyCond: { type: [ConditionAndQuantitySchema], default: [] },
-  status: { type: String, required: true, enum: BORROWED_EQUIPMENT_STATUS },
+  borrowedEquipmentStatus: { type: [BorrowedEquipmentStatusSchema], default: [] },
   remarks: { type: String, default: '' },
 });
 
@@ -97,9 +106,7 @@ export class BorrowedEqpmnt {
   timeOfUseEnd: string;
   equipment: IEquipment;
   quantity: number;
-  releasedQtyCond: IConditionAndQuantity[];
-  returnedQtyCond: IConditionAndQuantity[];
-  status: BorrowedEquipmentStatus;
+  borrowedEquipmentStatus: BorrowedEquipmentStatus[];
   remarks: string;
 
   constructor(
@@ -115,9 +122,7 @@ export class BorrowedEqpmnt {
     timeOfUseEnd: string,
     equipment: IEquipment,
     quantity: number,
-    releasedQtyCond: IConditionAndQuantity[],
-    returnedQtyCond: IConditionAndQuantity[],
-    status: BorrowedEquipmentStatus,
+    borrowedEquipmentStatus: BorrowedEquipmentStatus[],
     remarks: string
   ) {
     this.borrower = borrower;
@@ -132,9 +137,7 @@ export class BorrowedEqpmnt {
     this.timeOfUseEnd = timeOfUseEnd;
     this.equipment = equipment;
     this.quantity = quantity;
-    this.releasedQtyCond = releasedQtyCond;
-    this.returnedQtyCond = returnedQtyCond;
-    this.status = status;
+    this.borrowedEquipmentStatus = borrowedEquipmentStatus;
     this.remarks = remarks;
   }
 }
