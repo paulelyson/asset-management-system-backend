@@ -33,11 +33,12 @@ export type BorrowedEquipmentStatusType =
   | 'unreturned'
   | 'system_reset';
 
-interface BorrowedEquipmentStatus extends IConditionAndQuantity {
-  status: string;
+export interface BorrowedEquipmentStatus extends IConditionAndQuantity {
+  status: BorrowedEquipmentStatusType;
 }
 
 interface IBorrowedEquipment {
+	_id?: Types.ObjectId;
   equipment: Types.ObjectId;
   quantity: number;
   borrowedEquipmentStatus: BorrowedEquipmentStatus[];

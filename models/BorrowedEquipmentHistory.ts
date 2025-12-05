@@ -1,11 +1,11 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import { IConditionAndQuantity } from './Equipment';
-import { BorrowedEquipmentStatus } from './BorrowedEquipment';
+import { BorrowedEquipmentStatusType } from './BorrowedEquipment';
 
 export interface IBorrowedEquipmentHistory {
   borrowId: Types.ObjectId;
   equipment: Types.ObjectId;
-  updatedStatus: BorrowedEquipmentStatus;
+  updatedStatus: BorrowedEquipmentStatusType;
   updatedConditionQuantity: IConditionAndQuantity;
   responsibleUser: Types.ObjectId;
   remarks: string;
