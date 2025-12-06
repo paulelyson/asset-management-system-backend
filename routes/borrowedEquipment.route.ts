@@ -3,6 +3,12 @@ import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentReposi
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { Types } from 'mongoose';
 import { BorrowedEquipmentStatus } from '../models/BorrowedEquipment';
+
+interface BorrowedEquipmentStatusExt extends BorrowedEquipmentStatus {
+  id: Types.ObjectId;
+  equipment:  Types.ObjectId;
+}
+
 const router = Router();
 const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
 
@@ -30,12 +36,8 @@ router.post('/', async (req: Request, res: Response) =>
         resp.borrowedEquipment.map((eqpmnt) => {
           let id = resp._id;
           let equipment = eqpmnt.equipment;
-          let status: BorrowedEquipmentStatus = {
-            quantity: eqpmnt.quantity,
-            status: 'requested',
-            condition: 'functional',
-          };
-          borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
+          let status: BorrowedEquipmentStatus = { quantity: eqpmnt.quantity, status: 'requested', condition: 'functional' };
+          return borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
         })
       );
 
@@ -45,5 +47,30 @@ router.post('/', async (req: Request, res: Response) =>
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
     })
 );
+
+router.patch('/updatestatus', (req: Request, res: Response) => {
+  Promise.resolve()
+    .then(async () => {
+      const updatedEquipment = req.body as BorrowedEquipmentStatusExt[];
+      await Promise.all(
+        updatedEquipment.map((eqpmnt: BorrowedEquipmentStatusExt) => {
+          const id = eqpmnt.id;
+          const equipment = eqpmnt.equipment;
+          const status: BorrowedEquipmentStatus = {
+            quantity: eqpmnt.quantity,
+            status: eqpmnt.status,
+            condition: eqpmnt.condition,
+            remarks: eqpmnt?.remarks,
+          };
+
+          return borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
+        })
+      );
+      res.json({ data: null, message: 'Success updating equipment status', success: true });
+    })
+    .catch((err: ErrorException) => {
+      res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    });
+});
 
 export default router;

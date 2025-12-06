@@ -30,7 +30,11 @@ class BorrowedEquipmentRepository {
     Promise.resolve()
       .then(async () => {
         const query = { _id: _id, 'borrowedEquipment.equipment': equipment };
-        await BorrowedEquipment.findOneAndUpdate(query, { $push: { 'borrowedEquipment.$.borrowedEquipmentStatus': status } });
+        await BorrowedEquipment.findOneAndUpdate(
+          query,
+          { $push: { 'borrowedEquipment.$.borrowedEquipmentStatus': status } },
+          { runValidators: true, new: true }
+        );
       })
       .catch((err) => {
         throw new ErrorException(400, err.message);

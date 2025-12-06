@@ -10,7 +10,7 @@ const minArrayLength = (min: number) => ({
 
 const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
   'requested',
-  'faculty_confirmed',
+  'faculty_approved',
   'faculty_rejected',
   'oic_approved',
   'oic_rejected',
@@ -23,7 +23,7 @@ const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
 
 export type BorrowedEquipmentStatusType =
   | 'requested'
-  | 'faculty_confirmed'
+  | 'faculty_approved'
   | 'faculty_rejected'
   | 'oic_approved'
   | 'oic_rejected'
@@ -35,14 +35,14 @@ export type BorrowedEquipmentStatusType =
 
 export interface BorrowedEquipmentStatus extends IConditionAndQuantity {
   status: BorrowedEquipmentStatusType;
+  remarks?: string;
 }
 
 interface IBorrowedEquipment {
-	_id?: Types.ObjectId;
+  _id?: Types.ObjectId;
   equipment: Types.ObjectId;
   quantity: number;
   borrowedEquipmentStatus: BorrowedEquipmentStatus[];
-  remarks: string;
 }
 
 export interface IBorrowingDetails {
@@ -65,6 +65,7 @@ const BorrowedEquipmentStatusSchema = new Schema<BorrowedEquipmentStatus>(
     quantity: { type: Number, required: true },
     condition: { type: String, required: true, enum: EQUIPMENT_CONDITION },
     status: { type: String, required: true, enum: BORROWED_EQUIPMENT_STATUS },
+    remarks: { type: String, default: '' },
   },
   { timestamps: true }
 );
@@ -73,7 +74,6 @@ const BorrowedEquipmentSchema = new Schema<IBorrowedEquipment>({
   equipment: { type: Schema.Types.ObjectId, required: true },
   quantity: { type: Number, required: true, min: 1 },
   borrowedEquipmentStatus: { type: [BorrowedEquipmentStatusSchema], default: [] },
-  remarks: { type: String, default: '' },
 });
 
 const BorrowingDetailsSchema = new Schema<IBorrowingDetails>(
