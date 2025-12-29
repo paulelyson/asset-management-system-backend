@@ -6,7 +6,7 @@ import { BorrowedEquipmentStatus } from '../models/BorrowedEquipment';
 
 interface BorrowedEquipmentStatusExt extends BorrowedEquipmentStatus {
   id: Types.ObjectId;
-  equipment:  Types.ObjectId;
+  equipment: Types.ObjectId;
 }
 
 const router = Router();

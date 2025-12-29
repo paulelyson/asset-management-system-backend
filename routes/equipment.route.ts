@@ -1,10 +1,16 @@
 import { Router, Request, Response } from 'express';
 import Equipment from '../models/Equipment';
-const router = Router();
+import EquipmentRepository from '../repositories/EquipmentRepository';
+import ErrorException from '../shared/exceptions/ErrorExceptions';
+import { Department } from '../models/User';
 
 interface IEquipmentFilterQuery {
   name?: any;
+  department?: string;
 }
+
+const equipmentRepository = new EquipmentRepository();
+const router = Router();
 
 router.get('/', async (req: Request, res: Response) =>
   Promise.resolve()
@@ -23,6 +29,18 @@ router.get('/', async (req: Request, res: Response) =>
     })
     .catch((err) => {
       res.status(400).json({ data: null, message: err.message, success: false });
+    })
+);
+
+router.get('/categories', async (req: Request, res: Response) =>
+  Promise.resolve()
+    .then(async () => {
+      const department = (req.query.department as Department) ?? 'computer_engineering';
+      const borrowedEquipments = await equipmentRepository.getCategories(department);
+      res.json({ data: borrowedEquipments, message: 'Success getting equipment', success: true });
+    })
+    .catch((err: ErrorException) => {
+      res.status(err.statusCode).json({ data: null, message: err.message, success: false });
     })
 );
 
