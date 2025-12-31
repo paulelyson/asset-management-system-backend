@@ -5,10 +5,10 @@ import ErrorException from '../shared/exceptions/ErrorExceptions';
 class EquipmentRepository {
   save = () => {};
 
-  getCategories = async (department: Department): Promise<string[]> =>
+  getCategories = async ( distinct: string, query: any): Promise<string[]> =>
     Promise.resolve()
       .then(async () => {
-        const result: string[] = await Equipment.find({ department }).distinct('categories');
+        const result: string[] = await Equipment.find(query).distinct(distinct);
         return result;
       })
       .catch((err) => {
