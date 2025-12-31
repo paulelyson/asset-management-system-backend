@@ -1,4 +1,4 @@
-export const GetBorrowedEquipmentAggregate = (): any[] => [
+export const GetBorrowedEquipmentAggregate = (query:any, page: number, limit: number): any[] => [
   {
     $unwind: {
       path: '$borrowedEquipment',

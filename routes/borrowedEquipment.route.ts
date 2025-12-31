@@ -2,11 +2,21 @@ import { Router, Request, Response } from 'express';
 import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentRepository';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { Types } from 'mongoose';
-import { BorrowedEquipmentStatus } from '../models/BorrowedEquipment';
+import { BorrowedEquipmentStatus, BorrowedEquipmentStatusType } from '../models/BorrowedEquipment';
+import { Department } from '../models/User';
 
 interface BorrowedEquipmentStatusExt extends BorrowedEquipmentStatus {
   id: Types.ObjectId;
   equipment: Types.ObjectId;
+}
+
+interface IBorrowedEquipmentStatusFilter {
+  borrower?: Types.ObjectId;
+  faculty?: Types.ObjectId;
+  department?: Department;
+  className?: string;
+  purpose?: string;
+  status?: BorrowedEquipmentStatusType;
 }
 
 const router = Router();
@@ -15,7 +25,22 @@ const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
 router.get('/', async (req: Request, res: Response) =>
   Promise.resolve()
     .then(async () => {
-      const borrowedEquipments = await borrowedEquipmentRepository.find();
+      const page = req.query.page ? Number(req.query.page) : 1;
+      const limit = req.query.limit ? Number(req.query.limit) : 15;
+      const { borrower, faculty, department, className, purpose, status } = req.query;
+      const query = {
+        ...(borrower && { borrower }),
+        ...(faculty && { faculty }),
+        ...(department && { classDepartment: department }),
+        ...(className && { className }),
+        ...(purpose && { purpose }),
+      };
+
+      return { query, page, limit };
+    })
+    .then(async (params) => {
+      const { query, page, limit } = params;
+      const borrowedEquipments = await borrowedEquipmentRepository.find(query, page, limit);
       res.json({ data: borrowedEquipments, message: 'Success getting equipment', success: true });
     })
     .catch((err: ErrorException) => {

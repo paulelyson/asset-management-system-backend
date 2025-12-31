@@ -15,10 +15,10 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message, errors);
       });
 
-  find = async (): Promise<BorrowedEqpmnt[]> =>
+  find = async (query: any, page: number, limit: number): Promise<BorrowedEqpmnt[]> =>
     Promise.resolve()
       .then(async () => {
-        const aggregateQuery = GetBorrowedEquipmentAggregate();
+        const aggregateQuery = GetBorrowedEquipmentAggregate(query, page, limit);
         const result: BorrowedEqpmnt[] = await BorrowedEquipment.aggregate(aggregateQuery);
         return result;
       })
