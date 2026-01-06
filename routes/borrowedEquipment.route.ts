@@ -27,15 +27,10 @@ router.get('/', async (req: Request, res: Response) =>
     .then(async () => {
       const page = req.query.page ? Number(req.query.page) : 1;
       const limit = req.query.limit ? Number(req.query.limit) : 15;
-      const { borrower, faculty, department, className, purpose, status } = req.query;
+      const { search } = req.query;
       const query = {
-        ...(borrower && { borrower }),
-        ...(faculty && { faculty }),
-        ...(department && { classDepartment: department }),
-        ...(className && { className }),
-        ...(purpose && { purpose }),
+        ...(search && { 'equipment.name': { $regex: search, $options: 'i' } }),
       };
-
       return { query, page, limit };
     })
     .then(async (params) => {

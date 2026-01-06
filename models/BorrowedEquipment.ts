@@ -5,7 +5,7 @@ import { Department, departments, IUser } from './User';
 const validateTime = (time: string) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
 const minArrayLength = (min: number) => ({
   validator: (v: any) => Array.isArray(v) && v.length >= min,
-  message: (v: any) => `Array must contain at least ${min} items.`,
+  message: (v: any) => `Must borrow at least ${min} item(s).`,
 });
 
 const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
