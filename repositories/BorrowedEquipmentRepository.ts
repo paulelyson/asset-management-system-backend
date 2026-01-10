@@ -1,7 +1,14 @@
-import BorrowedEquipment, { IBorrowingDetails, BorrowedEqpmnt, BorrowedEquipmentStatus } from '../models/BorrowedEquipment';
+import BorrowedEquipment, {
+  IBorrowingDetails,
+  BorrowedEqpmnt,
+  BorrowedEquipmentStatus,
+  BorrowedEquipmentStatusType,
+} from '../models/BorrowedEquipment';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { GetBorrowedEquipmentAggregate } from '../shared/aggregations/BorrowedEquipment.aggregate';
 import { Types } from 'mongoose';
+
+const STATUS_FLOW: BorrowedEquipmentStatusType[] = ['requested', 'faculty_approved', 'oic_approved', 'released', 'mark_returned', 'returned'];
 
 class BorrowedEquipmentRepository {
   save = async (borrowedEquipment: IBorrowingDetails) =>
@@ -40,7 +47,40 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message);
       });
 
+  filterByStatus = (borrowedEquipment: BorrowedEqpmnt[], status: BorrowedEquipmentStatusType) => {
+   return borrowedEquipment.filter((eqpmnt) => {
+      return this.getCurrentStatus(eqpmnt.borrowedEquipmentStatus).includes(status);
+    });
+  };
+
   findById = async () => {};
+
+  getCurrentStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]): BorrowedEquipmentStatusType[] {
+    // 1️⃣ Sum quantities per status (event-based accumulation)
+    const reached = new Map<BorrowedEquipmentStatusType, number>();
+    for (const tx of borrowedEquipmentStatus) {
+      reached.set(tx.status, (reached.get(tx.status) ?? 0) + tx.quantity);
+    }
+    // 2️⃣ Compute remaining count per status
+    const result: { status: BorrowedEquipmentStatusType; quantity: number }[] = [];
+    for (let i = 0; i < STATUS_FLOW.length; i++) {
+      const status = STATUS_FLOW[i];
+      const current = reached.get(status) ?? 0;
+      if (!current) continue;
+
+      // subtract everything that moved beyond this status
+      let progressed = 0;
+      for (let j = i + 1; j < STATUS_FLOW.length; j++) {
+        progressed += reached.get(STATUS_FLOW[j]) ?? 0;
+      }
+      const remaining = current - progressed;
+      if (remaining > 0) {
+        result.push({ status, quantity: remaining });
+      }
+    }
+
+    return result.map((x) => x.status);
+  }
 }
 
 export default BorrowedEquipmentRepository;

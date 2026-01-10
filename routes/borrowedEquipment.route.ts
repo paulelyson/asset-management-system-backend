@@ -27,17 +27,26 @@ router.get('/', async (req: Request, res: Response) =>
     .then(async () => {
       const page = req.query.page ? Number(req.query.page) : 1;
       const limit = req.query.limit ? Number(req.query.limit) : 15;
-      const { search, purpose } = req.query;
+      const { search, purpose, status } = req.query;
       const query = {
         ...(search && { 'equipment.name': { $regex: search, $options: 'i' } }),
         ...(purpose && { purpose: purpose }),
+        ...(status && { 'borrowedEquipmentStatus.status': status }),
       };
-      return { query, page, limit };
+      return { query, page, limit, status };
     })
     .then(async (params) => {
       const { query, page, limit } = params;
-      const borrowedEquipments = await borrowedEquipmentRepository.find(query, page, limit);
-      res.json({ data: borrowedEquipments, message: 'Success getting equipment', success: true });
+      const borrowedEquipment = await borrowedEquipmentRepository.find(query, page, limit);
+      return { borrowedEquipment, status: params.status };
+    })
+    .then((resp) => {
+      let borrowedEquipment = resp.borrowedEquipment;
+
+      if (resp.status) {
+        borrowedEquipment = borrowedEquipmentRepository.filterByStatus(borrowedEquipment, resp.status as BorrowedEquipmentStatusType);
+      }
+      res.json({ data: borrowedEquipment, message: 'Success getting equipment', success: true });
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
