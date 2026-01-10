@@ -37,6 +37,7 @@ export interface IUser {
   email: string;
   schoolId: string;
   department: Department[];
+  assignedTo: Department[];
   role: UserRole[];
   password: string;
   activated: boolean;
@@ -53,6 +54,7 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true },
     schoolId: { type: String, required: true },
     department: { type: [String], required: true, enum: departments },
+    assignedTo: { type: [String], required: true, enum: departments },
     role: { type: [String], required: true, enum: userRoles },
     password: { type: String, required: true },
     activated: { type: Boolean, required: true, default: false },
