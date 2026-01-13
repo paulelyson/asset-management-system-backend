@@ -22,7 +22,7 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message, errors);
       });
 
-  find = async (query: any, page: number, limit: number): Promise<BorrowedEqpmnt[]> =>
+  find = async (query: any, page: number, limit: number, _sort: number = 1): Promise<BorrowedEqpmnt[]> =>
     Promise.resolve()
       .then(async () => {
         const aggregateQuery = GetBorrowedEquipmentAggregate(query, page, limit);
@@ -48,14 +48,16 @@ class BorrowedEquipmentRepository {
       });
 
   filterByStatus = (borrowedEquipment: BorrowedEqpmnt[], status: BorrowedEquipmentStatusType) => {
-   return borrowedEquipment.filter((eqpmnt) => {
-      return this.getCurrentStatus(eqpmnt.borrowedEquipmentStatus).includes(status);
+    return borrowedEquipment.filter((eqpmnt) => {
+      return this.getCurrentStatus(eqpmnt.borrowedEquipmentStatus)
+        .map((x) => x.status)
+        .includes(status);
     });
   };
 
   findById = async () => {};
 
-  getCurrentStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]): BorrowedEquipmentStatusType[] {
+  getCurrentStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]) {
     // 1️⃣ Sum quantities per status (event-based accumulation)
     const reached = new Map<BorrowedEquipmentStatusType, number>();
     for (const tx of borrowedEquipmentStatus) {
@@ -79,7 +81,7 @@ class BorrowedEquipmentRepository {
       }
     }
 
-    return result.map((x) => x.status);
+    return result;
   }
 }
 

@@ -1,4 +1,4 @@
-export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: number): any[] => [
+export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: number, sort: string = 'updatedAt'): any[] => [
   {
     $unwind: {
       path: '$borrowedEquipment',
@@ -69,11 +69,17 @@ export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: n
       returnedQtyCond: '$borrowedEquipment.returnedQtyCond',
       status: '$borrowedEquipment.status',
       remarks: '$borrowedEquipment.remarks',
+      updateAt: '$borrowedEquipment.remarks',
       dis: 1,
     },
   },
   {
     $match: query,
+  },
+  {
+    $sort: {
+      [sort]: -1,
+    },
   },
   {
     $skip: limit * (page - 1),
