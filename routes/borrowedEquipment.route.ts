@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentRepository';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { BorrowedEquipmentStatus, BorrowedEquipmentStatusType } from '../models/BorrowedEquipment';
 import { Department } from '../models/User';
+import EquipmentRepository from '../repositories/EquipmentRepository';
+import Equipment from '../models/Equipment';
 
 interface BorrowedEquipmentStatusExt extends BorrowedEquipmentStatus {
   id: Types.ObjectId;
@@ -21,6 +23,7 @@ interface IBorrowedEquipmentStatusFilter {
 
 const router = Router();
 const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
+const equipmentRepository = new EquipmentRepository()
 
 router.get('/', async (req: Request, res: Response) =>
   Promise.resolve()
@@ -45,6 +48,34 @@ router.get('/', async (req: Request, res: Response) =>
 
       if (resp.status) {
         borrowedEquipment = borrowedEquipmentRepository.filterByStatus(borrowedEquipment, resp.status as BorrowedEquipmentStatusType);
+      }
+      res.json({ data: borrowedEquipment, message: 'Success getting equipment', success: true });
+    })
+    .catch((err: ErrorException) => {
+      res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    })
+);
+
+router.get('/isrequested/:equipmentid', async (req: Request, res: Response) =>
+  Promise.resolve()
+    .then(async () => {
+      let isRequested: boolean = false;
+      const equipmentId = new Types.ObjectId(req.params.equipmentid);
+      const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
+      const equipment = await Equipment.findById(equipmentId);
+      const borrowedEquipment = await borrowedEquipmentRepository.findByEquipmentId(equipmentId);
+      if (borrowedEquipment.length && equipment) {
+        const inCirculationStatus: BorrowedEquipmentStatusType[] = ['requested', 'faculty_approved', 'oic_approved', 'released', 'mark_returned'];
+        const inCirculation: number = borrowedEquipmentRepository
+          .getLatestStatus(borrowedEquipment[0].borrowedEquipmentStatus)
+          .filter((x) => inCirculationStatus.includes(x.status))
+          .map((x) => x.quantity)
+          .reduce((acc, curr) => acc + curr, 0);
+        isRequested = inCirculation >= equipment.totalQuantity;
+      }
+
+      if (isRequested) {
+        throw new ErrorException(400, 'Equipment already requested by other user');
       }
       res.json({ data: borrowedEquipment, message: 'Success getting equipment', success: true });
     })

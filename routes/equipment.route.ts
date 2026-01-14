@@ -49,9 +49,8 @@ router.get('/', async (req: Request, res: Response) =>
       if (params.borrow) {
         updated = await Promise.all(
           params.equipment.map(async (eqpmnt) => {
-            const query = { 'equipment._id': eqpmnt._id };
-            const borrowedEquipment = await borrowedEquipmentRepository.find(query, 1, 10);
             let totalQty = eqpmnt.totalQuantity;
+            const borrowedEquipment = await borrowedEquipmentRepository.findByEquipmentId(eqpmnt._id)
             if (borrowedEquipment.length) {
               const inCirculationStatus: BorrowedEquipmentStatusType[] = [
                 'requested',
@@ -61,7 +60,7 @@ router.get('/', async (req: Request, res: Response) =>
                 'mark_returned',
               ];
               const inCirculation: number = borrowedEquipmentRepository
-                .getCurrentStatus(borrowedEquipment[0].borrowedEquipmentStatus)
+                .getLatestStatus(borrowedEquipment[0].borrowedEquipmentStatus)
                 .filter((x) => inCirculationStatus.includes(x.status))
                 .map((x) => x.quantity)
                 .reduce((acc, curr) => acc + curr, 0);

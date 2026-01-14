@@ -6,7 +6,7 @@ import BorrowedEquipment, {
 } from '../models/BorrowedEquipment';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { GetBorrowedEquipmentAggregate } from '../shared/aggregations/BorrowedEquipment.aggregate';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 
 const STATUS_FLOW: BorrowedEquipmentStatusType[] = ['requested', 'faculty_approved', 'oic_approved', 'released', 'mark_returned', 'returned'];
 
@@ -47,17 +47,27 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message);
       });
 
+  // this is use if the borrowed equipment api if it has status filter
   filterByStatus = (borrowedEquipment: BorrowedEqpmnt[], status: BorrowedEquipmentStatusType) => {
     return borrowedEquipment.filter((eqpmnt) => {
-      return this.getCurrentStatus(eqpmnt.borrowedEquipmentStatus)
+      return this.getLatestStatus(eqpmnt.borrowedEquipmentStatus)
         .map((x) => x.status)
         .includes(status);
     });
   };
 
-  findById = async () => {};
+  findByEquipmentId = async (equipmentId: Types.ObjectId, page: number = 1, limit: number = 15, _sort: number = 1) =>
+    Promise.resolve()
+      .then(async () => {
+        const query = { 'equipment._id': equipmentId };
+        const result: BorrowedEqpmnt[] = await this.find(query, page, limit);
+        return result;
+      })
+      .catch((err) => {
+        throw new ErrorException(400, err.message);
+      });
 
-  getCurrentStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]) {
+  getLatestStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]) {
     // 1️⃣ Sum quantities per status (event-based accumulation)
     const reached = new Map<BorrowedEquipmentStatusType, number>();
     for (const tx of borrowedEquipmentStatus) {
