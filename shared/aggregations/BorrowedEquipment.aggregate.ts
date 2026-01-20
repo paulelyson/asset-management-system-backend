@@ -1,3 +1,6 @@
+import mongoose, { Schema, Types } from 'mongoose';
+const ObjectId = Types.ObjectId;
+
 export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: number, sort: string = 'updatedAt'): any[] => [
   {
     $unwind: {
@@ -45,6 +48,16 @@ export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: n
   },
   {
     $project: {
+      // trackId: {
+      //   $function: {
+      //     body: function () {
+      //       return new ObjectId();
+      //     },
+      //     args: [],
+      //     lang: 'js',
+      //   },
+      // },
+      trackId: { $concat: [{ $toString: '$_id' }, '_', { $toString: '$equipment._id' }] },
       'borrower._id': 1,
       'borrower.firstName': 1,
       'borrower.lastName': 1,
@@ -69,7 +82,7 @@ export const GetBorrowedEquipmentAggregate = (query: any, page: number, limit: n
       returnedQtyCond: '$borrowedEquipment.returnedQtyCond',
       status: '$borrowedEquipment.status',
       remarks: '$borrowedEquipment.remarks',
-      updateAt: '$borrowedEquipment.remarks',
+      updatedAt: '$borrowedEquipment.updatedAt',
       dis: 1,
     },
   },

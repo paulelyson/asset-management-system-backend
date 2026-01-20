@@ -23,7 +23,7 @@ interface IBorrowedEquipmentStatusFilter {
 
 const router = Router();
 const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
-const equipmentRepository = new EquipmentRepository()
+const equipmentRepository = new EquipmentRepository();
 
 router.get('/', async (req: Request, res: Response) =>
   Promise.resolve()
@@ -49,7 +49,15 @@ router.get('/', async (req: Request, res: Response) =>
       if (resp.status) {
         borrowedEquipment = borrowedEquipmentRepository.filterByStatus(borrowedEquipment, resp.status as BorrowedEquipmentStatusType);
       }
-      res.json({ data: borrowedEquipment, message: 'Success getting equipment', success: true });
+      return borrowedEquipment;
+    })
+    .then((borrowedEquipment) => {
+      // compute latest status
+      const updated = borrowedEquipment.map((eqpmnt) => {
+        const latestStatus = borrowedEquipmentRepository.getLatestStatus(eqpmnt.borrowedEquipmentStatus).map((x) => `${x.quantity} ${x.status}`);
+        return { ...eqpmnt, latestStatus };
+      });
+      res.json({ data: updated, message: 'Success getting equipment', success: true });
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
@@ -75,7 +83,7 @@ router.get('/isrequested/:equipmentid', async (req: Request, res: Response) =>
       }
 
       if (isRequested) {
-        throw new ErrorException(400, 'Equipment already requested by other user');
+        throw new ErrorException(400, 'No more available units');
       }
       res.json({ data: borrowedEquipment, message: 'Success getting equipment', success: true });
     })

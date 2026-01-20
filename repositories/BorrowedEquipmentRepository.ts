@@ -68,30 +68,53 @@ class BorrowedEquipmentRepository {
       });
 
   getLatestStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]) {
-    // 1️⃣ Sum quantities per status (event-based accumulation)
+    if (!borrowedEquipmentStatus?.length) return [];
+
+    // 1️⃣ Sum quantities per status
     const reached = new Map<BorrowedEquipmentStatusType, number>();
+
     for (const tx of borrowedEquipmentStatus) {
       reached.set(tx.status, (reached.get(tx.status) ?? 0) + tx.quantity);
     }
-    // 2️⃣ Compute remaining count per status
+
+    const cancelledQty = reached.get('cancelled') ?? 0;
+
     const result: { status: BorrowedEquipmentStatusType; quantity: number }[] = [];
+
     for (let i = 0; i < STATUS_FLOW.length; i++) {
       const status = STATUS_FLOW[i];
       const current = reached.get(status) ?? 0;
       if (!current) continue;
 
-      // subtract everything that moved beyond this status
+      // everything that progressed forward
       let progressed = 0;
       for (let j = i + 1; j < STATUS_FLOW.length; j++) {
         progressed += reached.get(STATUS_FLOW[j]) ?? 0;
       }
-      const remaining = current - progressed;
+
+      let remaining = current - progressed;
+
+      // cancellation only applies BEFORE release
+      const isPreRelease = STATUS_FLOW.indexOf(status) < STATUS_FLOW.indexOf('released');
+
+      if (isPreRelease) {
+        remaining -= cancelledQty;
+      }
+
       if (remaining > 0) {
         result.push({ status, quantity: remaining });
       }
     }
 
-    return result;
+    // cancelled is always terminal
+    if (cancelledQty > 0) {
+      result.push({
+        status: 'cancelled',
+        quantity: cancelledQty,
+      });
+    }
+
+    return result.filter((x) => x.quantity > 0);
   }
 }
 

@@ -18,6 +18,7 @@ const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
   'mark_returned',
   'returned',
   'unreturned',
+  'cancelled',
   'system_reset',
 ];
 
@@ -31,6 +32,7 @@ export type BorrowedEquipmentStatusType =
   | 'mark_returned'
   | 'returned'
   | 'unreturned'
+  | 'cancelled'
   | 'system_reset';
 
 export interface BorrowedEquipmentStatus extends IConditionAndQuantity {
@@ -108,6 +110,7 @@ export class BorrowedEqpmnt {
   equipment: IEquipment;
   quantity: number;
   borrowedEquipmentStatus: BorrowedEquipmentStatus[];
+  latestStatus: string[];
   remarks: string;
 
   constructor(
@@ -124,6 +127,7 @@ export class BorrowedEqpmnt {
     equipment: IEquipment,
     quantity: number,
     borrowedEquipmentStatus: BorrowedEquipmentStatus[],
+    latestStatus: string[],
     remarks: string
   ) {
     this.borrower = borrower;
@@ -139,6 +143,7 @@ export class BorrowedEqpmnt {
     this.equipment = equipment;
     this.quantity = quantity;
     this.borrowedEquipmentStatus = borrowedEquipmentStatus;
+    this.latestStatus = latestStatus;
     this.remarks = remarks;
   }
 }
