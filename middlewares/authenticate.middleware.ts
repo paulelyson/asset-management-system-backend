@@ -1,10 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { IUser } from '../models/User';
+import { Types } from 'mongoose';
+
+export interface TokenData extends IUser {
+  _id: Types.ObjectId;
+  name: string;
+  iat: number;
+}
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload | string;
+      user: JwtPayload | string | TokenData;
     }
   }
 }

@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IBorrowedEquipmentHistory } from '../models/BorrowedEquipmentHistory';
 import BorrowedEquipmentHistory from '../models/BorrowedEquipmentHistory';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
@@ -8,6 +9,17 @@ class BorrowedEquipmentHistoryRepository {
       .then(async () => {
         const data = new BorrowedEquipmentHistory(history);
         await data.save();
+      })
+      .catch((err) => {
+        console.log(err);
+        const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);
+        throw new ErrorException(400, err._message, errors);
+      });
+
+  find = async (borrowId: Types.ObjectId, equipment: Types.ObjectId) =>
+    Promise.resolve()
+      .then(async () => {
+        return await BorrowedEquipmentHistory.find({ borrowId, equipment }).lean();
       })
       .catch((err) => {
         const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);

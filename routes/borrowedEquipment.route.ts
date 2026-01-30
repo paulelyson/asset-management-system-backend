@@ -6,6 +6,9 @@ import { BorrowedEquipmentStatus, BorrowedEquipmentStatusType } from '../models/
 import { Department } from '../models/User';
 import EquipmentRepository from '../repositories/EquipmentRepository';
 import Equipment from '../models/Equipment';
+import { IBorrowedEquipmentHistory } from '../models/BorrowedEquipmentHistory';
+import { TokenData } from '../middlewares/authenticate.middleware';
+import BorrowedEquipmentHistoryRepository from '../repositories/BorrowedEquipmentHistoryRepository';
 
 interface BorrowedEquipmentStatusExt extends BorrowedEquipmentStatus {
   id: Types.ObjectId;
@@ -24,6 +27,7 @@ interface IBorrowedEquipmentStatusFilter {
 const router = Router();
 const borrowedEquipmentRepository = new BorrowedEquipmentRepository();
 const equipmentRepository = new EquipmentRepository();
+const borrowedEquipmentHistoryRepository = new BorrowedEquipmentHistoryRepository();
 
 router.get('/', async (req: Request, res: Response) =>
   Promise.resolve()
@@ -61,7 +65,7 @@ router.get('/', async (req: Request, res: Response) =>
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
-    })
+    }),
 );
 
 router.get('/isrequested/:equipmentid', async (req: Request, res: Response) =>
@@ -89,7 +93,17 @@ router.get('/isrequested/:equipmentid', async (req: Request, res: Response) =>
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    }),
+);
+
+router.get('/history/:borrowid', async (req: Request, res: Response) =>
+  Promise.resolve()
+    .then(async () => {
+      
     })
+    .catch((err: ErrorException) => {
+      res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    }),
 );
 
 router.post('/', async (req: Request, res: Response) =>
@@ -107,14 +121,37 @@ router.post('/', async (req: Request, res: Response) =>
           let equipment = eqpmnt.equipment;
           let status: BorrowedEquipmentStatus = { quantity: eqpmnt.quantity, status: 'requested', condition: 'functional' };
           return borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
-        })
+        }),
       );
+      return resp;
+    })
+    .then(async (resp) => {
+      /**
+       * add requested history
+       */
+      await Promise.all(
+        resp.borrowedEquipment.map((eqpmnt) => {
+          let history: IBorrowedEquipmentHistory = {
+            borrowId: resp._id,
+            equipment: eqpmnt.equipment,
+            updatedStatus: 'requested',
+            updatedConditionQuantity: {
+              condition: 'functional',
+              quantity: eqpmnt.quantity,
+            },
+            responsibleUser: (req.user as TokenData)._id,
+            remarks: '',
+            dis: false,
+          };
 
+          return borrowedEquipmentHistoryRepository.save(history);
+        }),
+      );
       res.json({ data: null, message: 'Success creating equipment', success: true });
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
-    })
+    }),
 );
 
 router.patch('/updatestatus', (req: Request, res: Response) => {
@@ -133,7 +170,7 @@ router.patch('/updatestatus', (req: Request, res: Response) => {
           };
 
           return borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
-        })
+        }),
       );
       res.json({ data: null, message: 'Success updating equipment status', success: true });
     })
