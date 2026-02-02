@@ -19,7 +19,8 @@ class BorrowedEquipmentHistoryRepository {
   find = async (borrowId: Types.ObjectId, equipment: Types.ObjectId) =>
     Promise.resolve()
       .then(async () => {
-        return await BorrowedEquipmentHistory.find({ borrowId, equipment }).lean();
+        let populateQuery = [{ path: 'responsibleUser', select: 'schoolId firstName lastName department' }];
+        return await BorrowedEquipmentHistory.find({ borrowId, equipment }).populate(populateQuery).lean();
       })
       .catch((err) => {
         const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);

@@ -96,10 +96,17 @@ router.get('/isrequested/:equipmentid', async (req: Request, res: Response) =>
     }),
 );
 
-router.get('/history/:borrowid', async (req: Request, res: Response) =>
+router.get('/history', async (req: Request, res: Response) =>
   Promise.resolve()
     .then(async () => {
-      
+      const { borrowId, equipment } = req.query;
+      if (!borrowId || !equipment) {
+        throw new ErrorException(400, 'Missing query params');
+      }
+      const borrowObjectId = new Types.ObjectId(borrowId as string);
+      const equipmentId = new Types.ObjectId(equipment as string);
+      const histories = await borrowedEquipmentHistoryRepository.find(borrowObjectId, equipmentId);
+      res.json({ data: histories, message: 'Success getting equipment', success: true });
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });

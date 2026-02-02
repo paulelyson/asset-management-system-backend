@@ -17,9 +17,12 @@ const BorrowedEquipmentHistorySchema = new Schema<IBorrowedEquipmentHistory>({
   equipment: { type: Schema.Types.ObjectId, required: true },
   updatedStatus: { type: String, required: true },
   updatedConditionQuantity: { type: ConditionAndQuantitySchema, required: true },
-  responsibleUser: { type: Schema.Types.ObjectId, required: true },
+  responsibleUser: { type: Schema.Types.ObjectId, required: true, ref: 'user' },
   remarks: { type: String },
   dis: { type: Boolean, required: true, default: true },
+},
+{
+  timestamps: true
 });
 
 export default mongoose.model('borrowedEquipmentHistory', BorrowedEquipmentHistorySchema);
