@@ -148,7 +148,7 @@ router.post('/', async (req: Request, res: Response) =>
             },
             responsibleUser: (req.user as TokenData)._id,
             remarks: '',
-            dis: false,
+            dis: true,
           };
 
           return borrowedEquipmentHistoryRepository.save(history);
@@ -179,6 +179,36 @@ router.patch('/updatestatus', (req: Request, res: Response) => {
           return borrowedEquipmentRepository.updateBorrowedEquipmentStatus(id, equipment, status);
         }),
       );
+
+      return updatedEquipment;
+    })
+    .then(async (resp) => {
+      /**
+       * add requested history
+       */
+      if (resp) {
+        await Promise.all(
+          resp.map((eqpmnt) => {
+            if (eqpmnt) {
+              let history: IBorrowedEquipmentHistory = {
+                borrowId: eqpmnt.id,
+                equipment: eqpmnt.equipment,
+                updatedStatus: eqpmnt.status,
+                updatedConditionQuantity: {
+                  condition: eqpmnt.condition,
+                  quantity: eqpmnt.quantity,
+                },
+                responsibleUser: (req.user as TokenData)._id,
+                remarks: eqpmnt?.remarks ?? '',
+                dis: true,
+              };
+              return borrowedEquipmentHistoryRepository.save(history);
+            }
+            return;
+          }),
+        );
+      }
+
       res.json({ data: null, message: 'Success updating equipment status', success: true });
     })
     .catch((err: ErrorException) => {

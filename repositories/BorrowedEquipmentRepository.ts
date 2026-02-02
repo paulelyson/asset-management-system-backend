@@ -33,11 +33,11 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message);
       });
 
-  updateBorrowedEquipmentStatus = async (_id: Types.ObjectId, equipment: Types.ObjectId, status: BorrowedEquipmentStatus) =>
+  updateBorrowedEquipmentStatus = async (_id: Types.ObjectId, equipment: Types.ObjectId, status: BorrowedEquipmentStatus): Promise<IBorrowingDetails | null> =>
     Promise.resolve()
       .then(async () => {
         const query = { _id: _id, 'borrowedEquipment.equipment': equipment };
-        await BorrowedEquipment.findOneAndUpdate(
+        return await BorrowedEquipment.findOneAndUpdate(
           query,
           { $push: { 'borrowedEquipment.$.borrowedEquipmentStatus': status } },
           { runValidators: true, new: true }
