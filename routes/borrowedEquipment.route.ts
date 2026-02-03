@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentRepository';
 import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { ObjectId, Types } from 'mongoose';
-import { BorrowedEquipmentStatus, BorrowedEquipmentStatusType } from '../models/BorrowedEquipment';
+import { BorrowedEquipmentStatus, BorrowedEquipmentStatusType, PREV_BORROWED_EQUIPMENT_STATUS } from '../models/BorrowedEquipment';
 import { Department } from '../models/User';
 import EquipmentRepository from '../repositories/EquipmentRepository';
 import Equipment from '../models/Equipment';
@@ -164,7 +164,39 @@ router.post('/', async (req: Request, res: Response) =>
 router.patch('/updatestatus', (req: Request, res: Response) => {
   Promise.resolve()
     .then(async () => {
+      /**
+       * check if the update quantity > current quantity
+       */
+
       const updatedEquipment = req.body as BorrowedEquipmentStatusExt[];
+      const currentBorrowedEqpmnt = (
+        await Promise.all(
+          updatedEquipment.map((eqpmnt) => {
+            const query = { _id: new Types.ObjectId(eqpmnt.id), 'equipment._id': new Types.ObjectId(eqpmnt.equipment) };
+            return borrowedEquipmentRepository.find(query, 1, 1);
+          }),
+        )
+      ).flat(1);
+      const overQty = updatedEquipment.filter((eqpmnt) => {
+        const current = currentBorrowedEqpmnt.find((x) => {
+          return new Types.ObjectId(x.equipment._id).toString() == new Types.ObjectId(eqpmnt.equipment).toString();
+        });
+        if (current) {
+          const prevStatus = PREV_BORROWED_EQUIPMENT_STATUS[eqpmnt.status];
+          const currentStatus = borrowedEquipmentRepository
+            .getLatestStatus(current?.borrowedEquipmentStatus)
+            .find((x) => prevStatus.includes(x.status));
+          return currentStatus ? eqpmnt.quantity > currentStatus.quantity : false;
+        }
+        return false;
+      });
+      if (overQty.length) {
+        throw new ErrorException(400, 'Applied quantity is more than the limit.');
+      }
+
+      return updatedEquipment;
+    })
+    .then(async (updatedEquipment) => {
       await Promise.all(
         updatedEquipment.map((eqpmnt: BorrowedEquipmentStatusExt) => {
           const id = eqpmnt.id;

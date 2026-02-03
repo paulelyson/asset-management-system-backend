@@ -22,6 +22,20 @@ const BORROWED_EQUIPMENT_STATUS: BorrowedEquipmentStatusType[] = [
   'system_reset',
 ];
 
+export const PREV_BORROWED_EQUIPMENT_STATUS: Record<BorrowedEquipmentStatusType, BorrowedEquipmentStatusType[]> = {
+  requested: [],
+  faculty_rejected: [],
+  faculty_approved: ['requested'],
+  oic_approved: ['requested'],
+  oic_rejected: [],
+  released: ['faculty_approved', 'oic_approved'],
+  mark_returned: ['released'],
+  returned: ['mark_returned'],
+  unreturned: [],
+  cancelled: [],
+  system_reset: []
+}
+
 export type BorrowedEquipmentStatusType =
   | 'requested'
   | 'faculty_approved'
@@ -69,7 +83,7 @@ const BorrowedEquipmentStatusSchema = new Schema<BorrowedEquipmentStatus>(
     status: { type: String, required: true, enum: BORROWED_EQUIPMENT_STATUS },
     remarks: { type: String, default: '' },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const BorrowedEquipmentSchema = new Schema<IBorrowedEquipment>({
@@ -93,10 +107,11 @@ const BorrowingDetailsSchema = new Schema<IBorrowingDetails>(
     borrowedEquipment: { type: [BorrowedEquipmentSchema], default: [], validate: minArrayLength(1) },
     dis: { type: Boolean, required: true, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export class BorrowedEqpmnt {
+  _id: Types.ObjectId;
   borrower: IUser;
   classDepartment: Department;
   faculty: IUser;
@@ -128,7 +143,8 @@ export class BorrowedEqpmnt {
     quantity: number,
     borrowedEquipmentStatus: BorrowedEquipmentStatus[],
     latestStatus: string[],
-    remarks: string
+    remarks: string,
+    _id: Types.ObjectId,
   ) {
     this.borrower = borrower;
     this.classDepartment = classDepartment;
@@ -145,6 +161,7 @@ export class BorrowedEqpmnt {
     this.borrowedEquipmentStatus = borrowedEquipmentStatus;
     this.latestStatus = latestStatus;
     this.remarks = remarks;
+    this._id = _id;
   }
 }
 

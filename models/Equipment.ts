@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { Department, departments } from './User';
 
 type EquipmentCondition = 'functional' | 'defective' | 'obsolete' | 'lost' | 'for_checkup' | 'turned_over';
@@ -22,6 +22,7 @@ interface IEquipmentImage {
 }
 
 export interface IEquipment {
+  _id: Types.ObjectId;
   serialNo: string;
   equipmentType: string;
   categories: string[];

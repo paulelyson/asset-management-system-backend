@@ -20,7 +20,7 @@ class BorrowedEquipmentHistoryRepository {
     Promise.resolve()
       .then(async () => {
         let populateQuery = [{ path: 'responsibleUser', select: 'schoolId firstName lastName department' }];
-        return await BorrowedEquipmentHistory.find({ borrowId, equipment }).populate(populateQuery).lean();
+        return await BorrowedEquipmentHistory.find({ borrowId, equipment }).populate(populateQuery).sort({ updatedAt: -1 }).lean();
       })
       .catch((err) => {
         const errors: string[] = Object.values(err.errors).map((e: any) => e?.properties?.message);
