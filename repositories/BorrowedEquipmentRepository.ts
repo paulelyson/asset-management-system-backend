@@ -33,14 +33,18 @@ class BorrowedEquipmentRepository {
         throw new ErrorException(400, err.message);
       });
 
-  updateBorrowedEquipmentStatus = async (_id: Types.ObjectId, equipment: Types.ObjectId, status: BorrowedEquipmentStatus): Promise<IBorrowingDetails | null> =>
+  updateBorrowedEquipmentStatus = async (
+    _id: Types.ObjectId,
+    equipment: Types.ObjectId,
+    status: BorrowedEquipmentStatus,
+  ): Promise<IBorrowingDetails | null> =>
     Promise.resolve()
       .then(async () => {
         const query = { _id: _id, 'borrowedEquipment.equipment': equipment };
         return await BorrowedEquipment.findOneAndUpdate(
           query,
           { $push: { 'borrowedEquipment.$.borrowedEquipmentStatus': status } },
-          { runValidators: true, new: true }
+          { runValidators: true, new: true },
         );
       })
       .catch((err) => {
@@ -70,50 +74,39 @@ class BorrowedEquipmentRepository {
   getLatestStatus(borrowedEquipmentStatus: BorrowedEquipmentStatus[]) {
     if (!borrowedEquipmentStatus?.length) return [];
 
-    // 1️⃣ Sum quantities per status
+    // 1️⃣ cumulative reached per status (use MAX)
     const reached = new Map<BorrowedEquipmentStatusType, number>();
 
     for (const tx of borrowedEquipmentStatus) {
-      reached.set(tx.status, (reached.get(tx.status) ?? 0) + tx.quantity);
+      reached.set(tx.status, Math.max(reached.get(tx.status) ?? 0, tx.quantity));
     }
-
-    const cancelledQty = reached.get('cancelled') ?? 0;
 
     const result: { status: BorrowedEquipmentStatusType; quantity: number }[] = [];
 
+    // 2️⃣ subtract the NEXT EXISTING downstream status
     for (let i = 0; i < STATUS_FLOW.length; i++) {
       const status = STATUS_FLOW[i];
-      const current = reached.get(status) ?? 0;
-      if (!current) continue;
+      const currentReached = reached.get(status);
+      if (!currentReached) continue;
 
-      // everything that progressed forward
-      let progressed = 0;
+      let nextReached = 0;
+
+      // 🔑 find the nearest downstream status that exists
       for (let j = i + 1; j < STATUS_FLOW.length; j++) {
-        progressed += reached.get(STATUS_FLOW[j]) ?? 0;
+        const candidate = reached.get(STATUS_FLOW[j]);
+        if (candidate !== undefined) {
+          nextReached = candidate;
+          break;
+        }
       }
 
-      let remaining = current - progressed;
+      const quantity = currentReached - nextReached;
 
-      // cancellation only applies BEFORE release
-      const isPreRelease = STATUS_FLOW.indexOf(status) < STATUS_FLOW.indexOf('released');
-
-      if (isPreRelease) {
-        remaining -= cancelledQty;
-      }
-
-      if (remaining > 0) {
-        result.push({ status, quantity: remaining });
+      if (quantity > 0) {
+        result.push({ status, quantity });
       }
     }
-
-    // cancelled is always terminal
-    if (cancelledQty > 0) {
-      result.push({
-        status: 'cancelled',
-        quantity: cancelledQty,
-      });
-    }
-
+    console.log({ result });
     return result.filter((x) => x.quantity > 0);
   }
 }

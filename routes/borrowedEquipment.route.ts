@@ -165,7 +165,7 @@ router.patch('/updatestatus', (req: Request, res: Response) => {
   Promise.resolve()
     .then(async () => {
       /**
-       * check if the update quantity > current quantity
+       * validate if the update quantity > current quantity or limit
        */
 
       const updatedEquipment = req.body as BorrowedEquipmentStatusExt[];
