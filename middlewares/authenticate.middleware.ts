@@ -33,3 +33,5 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
+
+export const generateToken = (data: any) => jwt.sign(data, JWT_SECRET, { expiresIn: '10d' });

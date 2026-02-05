@@ -11,7 +11,7 @@ router.get('/', async (req: Request, res: Response) =>
       let page = req.query.page ? Number(req.query.page) : 1;
       let limit = req.query.limit ? Number(req.query.limit) : 15;
 
-      let users = await userRepository.find();
+      let users = await userRepository.find({});
       res.json({ data: users, message: 'Success getting users', success: true });
     })
     .catch((err: ErrorException) => {

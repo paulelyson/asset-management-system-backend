@@ -14,6 +14,7 @@ const DATABASE = process.env.DATABASE || 'mongodb://127.0.0.1:27017/usjr_ams_loc
 import EquipmentRoute from './routes/equipment.route';
 import BorrowedEquipment from './routes/borrowedEquipment.route';
 import UserRoute from './routes/user.route';
+import LoginRoute from './routes/login.route';
 import { authenticate } from './middlewares/authenticate.middleware';
 
 /**
@@ -26,6 +27,8 @@ app.use(cors());
 /**
  * routes
  */
+
+app.use('/api/login', LoginRoute);
 app.use('/api/equipment', EquipmentRoute);
 app.use('/api/borrowequipment', authenticate, BorrowedEquipment);
 app.use('/api/user', UserRoute);

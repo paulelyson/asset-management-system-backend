@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type Department =
   | 'civil_engineering'
@@ -30,6 +30,7 @@ const userRoles = ['administrator', 'chairman', 'oic', 'faculty', 'reads', 'stud
 const userStatus = ['pending_approval', 'active', 'deactivated', 'rejected'];
 
 export interface IUser {
+  _id: Types.ObjectId
   firstName: string;
   middleName: string;
   lastName: string;
