@@ -5,6 +5,7 @@ import ErrorException from '../shared/exceptions/ErrorExceptions';
 import { Department } from '../models/User';
 import BorrowedEquipmentRepository from '../repositories/BorrowedEquipmentRepository';
 import { BorrowedEquipmentStatusType } from '../models/BorrowedEquipment';
+import { Types } from 'mongoose';
 
 export interface IEquipmentFilterQuery {
   name?: any;
@@ -50,7 +51,7 @@ router.get('/', async (req: Request, res: Response) =>
         updated = await Promise.all(
           params.equipment.map(async (eqpmnt) => {
             let totalQty = eqpmnt.totalQuantity;
-            const borrowedEquipment = await borrowedEquipmentRepository.findByEquipmentId(eqpmnt._id)
+            const borrowedEquipment = await borrowedEquipmentRepository.findByEquipmentId(eqpmnt._id);
             if (borrowedEquipment.length) {
               const inCirculationStatus: BorrowedEquipmentStatusType[] = [
                 'requested',
@@ -62,19 +63,19 @@ router.get('/', async (req: Request, res: Response) =>
               const inCirculation: number = borrowedEquipmentRepository
                 .getLatestStatus(borrowedEquipment[0].borrowedEquipmentStatus)
                 .filter((x) => inCirculationStatus.includes(x.status))
-                .map((x) => x.quantity)
+                .map((x) => x.quantity) 
                 .reduce((acc, curr) => acc + curr, 0);
               totalQty = totalQty - inCirculation;
             }
             return { ...eqpmnt, totalQuantity: totalQty };
-          })
+          }),
         );
       }
       res.json({ data: updated, message: 'Success getting equipment', success: true });
     })
     .catch((err) => {
       res.status(400).json({ data: null, message: err.message, success: false });
-    })
+    }),
 );
 
 router.get('/distinct', async (req: Request, res: Response) =>
@@ -89,7 +90,22 @@ router.get('/distinct', async (req: Request, res: Response) =>
     })
     .catch((err: ErrorException) => {
       res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    }),
+);
+
+router.patch('/:id', async (req: Request, res: Response) =>
+  Promise.resolve()
+    .then(async () => {
+      // get old data
+      let equipmentId = new Types.ObjectId(req.params.id);
+      let updatedEquipment = req.body;
+      let oldData = await equipmentRepository.findById(equipmentId);
+      let changes = await equipmentRepository.getChangeValues(oldData, updatedEquipment);
+      res.json({ data: changes, message: 'Success updating equipment', success: true });
     })
+    .catch((err: ErrorException) => {
+      res.status(err.statusCode).json({ data: null, message: err.message, success: false });
+    }),
 );
 
 export default router;
